@@ -1,0 +1,39 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/home.css' %}">
+{% endblock %}
+{% block title %}
+    دسته بندی ها
+{% endblock %}
+{% block body %}
+    <section id="category" class="container">
+            <div class="row g-4">
+                {% for cat in category %}
+                    <div class="col-sm-4">
+                    <div class="card position-relative h-80 card-category">
+                        {% if cat.cat_video %}
+                            <video src="{{ cat.cat_video.url }}" type="video/mp4" autoplay muted loop
+                            class="card-img-top"></video>
+                        {% elif cat.cat_img %}
+                            <img src="{{ cat.cat_img.url }}"
+                            class="card-img-top img-fluid">
+                        {% endif %}
+                        <div class="overlay">
+                            <a href="{{ cat.get_absolute_url }}"
+                                class="see-product-cat text-decoration-none text-white">مشاهده
+                                محصولات</a>
+                        </div>
+                    </div>
+                    <p class="mt-2 category_name text-center">{{ cat.name }}</p>
+
+                </div>
+
+                {% endfor %}
+
+
+            </div>
+        </section>
+
+
+{% endblock %}

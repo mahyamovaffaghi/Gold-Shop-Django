@@ -1,0 +1,39 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'order/css/order.css' %}">
+{% endblock %}
+{% block title %}
+    سفارش
+{% endblock %}
+{% block body %}
+        <div class="profile-container mx-auto ">
+            <div class="form-wrapper">
+                <h2 class="titleProfile">تایید نهایی سفارش</h2>
+                <div class="my-4">
+                    <span>مبلغ قابل پرداخت  	&nbsp;: 	&nbsp;</span>
+                    <span>{{ order.get_price }} &nbsp;تومان	</span>
+                </div>
+                <form class="profile-form" action="{% url 'order:coupon_order' order.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group w-50 mx-auto">
+                        <label for="discountCodeInput" class="styled-label">کد تخفیف</label>
+                        <input type="text" id="discountCodeInput" class="styled-input" name="code">
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-evenly flex-row-reverse">
+                        <button type="submit" class="custom-btn-blue text-center px-3 py-2  mt-md-4 mt-2">اعمال کد
+                        تخفیف</button>
+                        <a href="{% url 'order:paid' order.id%}" class="custom-btn-paid text-center px-5 py-2 w-70 mt-3">پرداخت</a>
+                    </div>
+
+                </form>
+
+                <div class="bottom-links">
+                    <a href="{% url "home:home" %}" class="back-to-home">
+                        <i class="bi bi-house-door-fill"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+{% endblock %}

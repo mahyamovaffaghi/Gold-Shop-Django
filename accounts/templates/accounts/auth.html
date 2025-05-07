@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title> ورود به حساب کاربری</title>
+    <link rel="stylesheet" href="{% static 'accounts/css/account.css' %}">
+</head>
+<body>
+{% if reg_form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for field in reg_form %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+<section class="hight d-flex align-items-center justify-content-center">
+    <div class="container">
+        <div class="row">
+            <!-- فرم ثبت‌نام -->
+            <div class="col-md-6 form-container sign-up">
+                <h4 class="titleForm mb-3 text-center">ساخت حساب کاربری</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" id="fnameInput" name="f_name" class="styled-input" required>
+                        <label for="fnameInput" class="styled-label">نام</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="lnameInput" name="l_name" class="styled-input" required>
+                        <label for="lnameInput" class="styled-label">نام خانوادگی</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="phoneInputReg" name="phone_number" class="styled-input" required>
+                        <label for="phoneInputReg" class="styled-label">شماره موبایل</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="passwordInputReg1" name="password1" class="styled-input" required>
+                        <label for="passwordInputReg1" class="styled-label">رمز عبور</label>
+                        <span class="bar"></span>
+                        <i class="eye-icon" onclick="togglePasswordReg1()">👁</i>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="passwordInputReg2" name="password2" class="styled-input" required>
+                        <label for="passwordInputReg2" class="styled-label">تکرار رمز عبور</label>
+                        <span class="bar"></span>
+                        <i class="eye-icon" onclick="togglePasswordReg2()">👁</i>
+                    </div>
+                    <button class="custom-btn-blue text-center px-5 py-2 mt-1" type="submit" name="register">ثبت‌نام
+                    </button>
+                </form>
+            </div>
+
+            <!-- فرم ورود -->
+            <div class="col-md-6 form-container sign-in">
+                <h4 class="titleForm mb-3 text-center">ورود به حساب کاربری</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="tel" id="phoneInputLogin" name="user" class="styled-input" required>
+                        <label for="phoneInputLogin" class="styled-label">شماره موبایل</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="passwordInputLogin" name="password" class="styled-input"
+                               required>
+                        <label for="passwordInputLogin" class="styled-label">رمز عبور</label>
+                        <span class="bar"></span>
+                        <i class="eye-icon" onclick="togglePasswordLogin()">👁</i>
+                    </div>
+                    <button class="custom-btn-blue text-center px-5 py-2 mt-4" type="submit" name="login">ورود</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- بخش تبلیغات و تغییر حالت فرم -->
+        <div class="row">
+            <div class="col-md-12 toggle-container">
+                <div class="toggle">
+                    <div class="toggle-panel toggle-left">
+                        <p>طلا، نمادی از عشق و ارزش! با محصولات ویژه ما، لحظات خود را جاودانه کنید</p>
+                        <button class="hidden px-3 py-2 fw-bold mt-4" id="login">حساب کاربری دارید؟</button>
+                    </div>
+                    <div class="toggle-panel toggle-right">
+                        <p>بهترین سرمایه‌گذاری که می‌تونی انجام بدی</p>
+                        <button class="hidden px-3 py-2 fw-bold mt-4" id="register">حساب کاربری ندارید؟</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom_links">
+        <a href="{% url "accounts:forget_password" %}" class="forgot-link float-left mt-md-3 ">رمز عبور را فراموش
+            کرده‌اید؟</a>
+        <a href="{% url "home:home" %}" class="back-to-home">
+            <i class="bi bi-house-door-fill"></i>
+        </a>
+    </div>
+</section>
+
+<script src="{% static 'accounts/js/account.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

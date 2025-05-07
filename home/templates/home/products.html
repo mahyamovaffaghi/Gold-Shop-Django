@@ -1,0 +1,177 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/product.css' %}">
+{% endblock %}
+{% block title %}
+    محصولات
+{% endblock %}
+{% block body %}
+    <div class="container mt-5 px-5">
+        <div class="row align-items-center justify-content-between mb-5">
+            <div class="col-12 col-md-4 text-end order-0  order-md-3">
+                <h2 class="text-white fw-bold fs-2 me-md-5 ">لیست محصولات &nbsp;<span
+                        class="category-name" data-id="{{ data.id }}">{{ data.name }}</span></h2>
+            </div>
+            <div class="col-12 col-md-4 order-md-1 my-3 my-md-0 text-end">
+                <div class="search-box ">
+                    <div class="search-box">
+                        <input type="text" placeholder="جستجو محصول..." required name="search" id="search-input-inner">
+                        <div class="icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+                    </div>
+                    <div class="icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row" id="mainContentProductInner">
+            {% for product in products %}
+                <div class="col-lg-6 mb-4 d-flex">
+                    <div class="card mb-3 card-show-product w-100">
+                        <div class="row g-0 d-flex ">
+                            <div class="col-md-6 ">
+                                <div class="product-image h-100">
+                                    <img src="{{ product.product_img.url }}"
+                                         class="img-fluid rounded-end h-100 object-fit-cover" alt="...">
+                                    <div class="info p-3 text-end">
+                                        <h5 class="text-center fs-5 fw-bold py-2">خلاصه اطلاعات محصول</h5>
+                                        <ul>
+                                            <li class="fw-bold py-1 fs-5"><strong> {{ product.discount }}%</strong>&nbsp;:&nbsp;تخفیف
+                                            </li>
+                                            <li class="fw-bold py-1 fs-5"><strong> {{ product.fee }}%</strong>&nbsp;:&nbsp;اجرت
+                                            </li>
+                                            <li class="fw-bold py-1 fs-5"><strong>{{ product.weight }}g</strong>&nbsp;:&nbsp;وزن
+                                            </li>
+                                            <li class="fw-bold py-1 fs-5"><strong> 9%</strong>&nbsp;:&nbsp;مالیات</li>
+
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card-body d-flex flex-column justify-content-center h-100 text-end">
+                                    <div class="stars-box">
+                                        {% for i in "12345" %}
+                                            {% if product.average|floatformat:1 >= i %}
+                                                <i class="text-warning bi bi-star-fill"></i>
+                                            {% elif product.average|floatformat:1 >= i|add:"-0.5" %}
+                                                <i class="text-warning bi bi-star-half"></i>
+                                            {% else %}
+                                                <i class="text-warning bi bi-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <h5 class="card-title my-4 fw-bold">{{ product.product_name }}</h5>
+                                    <span class="card-text">
+                                    {{ product.info |slice:":200" }}
+                                    </span>
+                                    <a href="{% url 'home:product_details' product.id %}"
+                                       class="text-center py-2 px-3 mt-5 custom-btn-blue">مشاهده جزییات </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-auto mx-auto mb-5">
+                <ul class="pagination">
+                    {% if products.has_previous %}
+                        <li>
+                            <a href="?page={{ products.previous_page_number }}">&lt;</a>
+                        </li>
+                    {% endif %}
+
+
+                    {% for num in products.paginator.page_range %}
+                        <li>
+                            <a href="?page={{ num }}"
+                               class="{% if products.number == num %}active{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if products.has_next %}
+                        <li>
+                            <a href="?page={{ products.next_page_number }}">&gt;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const categoryId = {{ data.id }};
+        function generateStars(average) {
+            let starsHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                if (average >= i) {
+                    starsHTML += '<i class="text-warning bi bi-star-fill"></i>';
+                } else if (average >= i - 0.5) {
+                    starsHTML += '<i class="text-warning bi bi-star-half"></i>';
+                } else {
+                    starsHTML += '<i class="text-warning bi bi-star"></i>';
+                }
+            }
+            return starsHTML;
+        }
+
+        document.getElementById('search-input-inner').addEventListener('keyup', function () {
+            let query = this.value;
+            let categoryId = document.querySelector('.category-name').getAttribute('data-id');
+
+            fetch(`/inner-search/${categoryId}/?inner-search=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    var productsContainer = document.getElementById('mainContentProductInner');
+                    productsContainer.innerHTML = '';
+
+                    data.products.forEach(function (product) {
+                        var productCard = `
+                        <div class="col-lg-6 mb-4 d-flex mainContent">
+                            <div class="card mb-3 card-show-product w-100">
+                                <div class="row g-0 d-flex ">
+                                    <div class="col-md-6 ">
+                                        <div class="product-image h-100">
+                                            <img src="${product.image}" class="img-fluid rounded-end h-100 object-fit-cover" alt="...">
+                                            <div class="info p-3 text-end">
+                                                <h5 class="text-center fs-5 fw-bold py-2">خلاصه اطلاعات محصول</h5>
+                                                <ul>
+                                                    <li class="fw-bold py-1 fs-5"><strong> ${product.discount}%</strong>&nbsp;:&nbsp;تخفیف</li>
+                                                    <li class="fw-bold py-1 fs-5"><strong> ${product.fee}%</strong>&nbsp;:&nbsp;اجرت</li>
+                                                    <li class="fw-bold py-1 fs-5"><strong>${product.weight}g</strong>&nbsp;:&nbsp;وزن</li>
+                                                    <li class="fw-bold py-1 fs-5"><strong> 9%</strong>&nbsp;:&nbsp;مالیات</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card-body d-flex flex-column justify-content-center h-100 text-end">
+                                            <div class="stars-box">
+                                                ${generateStars(product.average)}
+                                            </div>
+                                            <h5 class="card-title my-4 fw-bold">${product.name}</h5>
+                                            <span class="card-text">${product.info.slice(0, 200)}</span>
+                                            <a href="/details/${product.id}/" class="text-center py-2 px-3 mt-5 custom-btn-blue">مشاهده جزییات</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                        productsContainer.innerHTML += productCard;
+                    });
+                });
+        });
+    </script>
+
+{% endblock %}

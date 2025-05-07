@@ -1,0 +1,483 @@
+{% extends '_base.html' %}
+{% load static %}
+{% load jformat %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/detail.css' %}">
+{% endblock %}
+{% block title %}
+    {{ product.product_name }}
+{% endblock %}
+{% block body %}
+    <div class="container mt-5 px-5">
+        <div class="row gx-5 align-items-center ">
+            <div class="col-lg-6">
+                <div class="border rounded-4 mb-3 d-flex justify-content-center align-items-center main-image">
+                    <a data-fslightbox="mygalley" class="rounded-4" target="_blank" data-type="image"
+                    >
+                        <img class="rounded-4 fit img-fluid"
+                             src="{{ product.product_img.url }}"/>
+                    </a>
+                </div>
+
+                <div class="d-flex justify-content-center flex-wrap gap-2 mt-5 thumbnail-container h-100">
+                    {% for image_pro in gallery %}
+                        <a data-fslightbox="mygalley" class="border rounded-2 mx-3" target="_blank">
+                            <img width="60" height="100" class="rounded-2 img-fluid "
+                                 src="{{ image_pro.gallery_img.url }}"/>
+                        </a>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+                <div class="ps-lg-3 text-center">
+                    <h4 class="title text-white fw-bold fs-2 mt-5 mt-lg-0">{{ product.product_name }}</h4>
+
+                    <div class=" stars  mt-4 mb-2">
+                        {% for i in "12345" %}
+                            {% if product.average|floatformat:1 >= i %}
+                                <i class="text-warning bi bi-star-fill"></i>
+                            {% elif product.average|floatformat:1 >= i|add:"-0.5" %}
+                                <i class="text-warning bi bi-star-half"></i>
+                            {% else %}
+                                <i class="text-warning bi bi-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="row flex-row-reverse sum-info justify-content-center">
+
+
+                        <div class="d-flex justify-content-evenly flex-row-reverse mb-2 mt-4">
+                            <span>اجرت</span>
+                            <span class="text-light">{{ product.fee }}%</span>
+                        </div>
+
+
+                        <div class="d-flex justify-content-evenly flex-row-reverse my-2">
+                            <span>تخفیف</span>
+                            <span class="text-light">{{ product.discount }}%</span>
+                        </div>
+
+
+                        <div class="d-flex justify-content-evenly flex-row-reverse my-2">
+                            <span>وزن</span>
+                            <span class="text-light ">{{ product.weight }}g</span>
+                        </div>
+                        {% if product.status == 'Color' %}
+                            <div class="form-group">
+                                <label class="styled-label my-2">رنگ</label>
+                                <div class="d-flex justify-content-center">
+                                    <form method="post" class="d-flex justify-content-center">
+                                        {% csrf_token %}
+                                        {% for data in variant %}
+                                            <div class="mx-2">
+                                                <input type="radio"
+                                                       class="variant-input"
+                                                       id="size-input-{{ data.id }}"
+                                                       name="select"
+                                                       value="{{ data.id }}"
+                                                       required
+                                                       onchange="this.form.submit()"
+                                                        {% if variants.id == data.id %} checked {% endif %}>
+
+                                                <label for="size-input-{{ data.id }}" class="text-light mx-2">
+                                                    {{ data.color_variant }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </form>
+
+
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="row mb-4 justify-content-center text-end align-items-center">
+                        {% if product.status == 'Size' %}
+                            <div class="col-md-4 col-6">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <label class="mb-2 label-select" for="size-select">سایز</label>
+                                    <select class="sort-select" id="size-select" name="select"
+                                            onchange="this.form.submit()">
+                                        {% for data in variant %}
+                                            <option value="{{ data.id }}" {% if variants.id == data.id %}
+                                                    selected {% endif %}>
+                                                {{ data.size_variant }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+
+                            </div>
+
+
+                        {% endif %}
+                        <div class="col-md-8 col-12 ">
+                            {% if product.status != 'None' %}
+                                <form class="d-flex align-items-center justify-content-center flex-column  gap-2 cart-form"
+                                      method="post" action="{% url 'cart:add_cart' product.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="select" value="{{ variants.id }}">
+                                    <div class="input-group flex-nowrap w-auto mt-4">
+                                        <button class="btn btn-white btn-decrease px-3" type="button">
+                                            <i class="bi bi-dash text-white"></i>
+                                        </button>
+                                        <input type="text" name="quantity"
+                                               class="form-control text-center border border-secondary input-quantity"
+                                               min="1"
+                                               value="1" max="{{ product.amount }}"/>
+                                        <button class="btn btn-white btn-increase px-3" type="button">
+                                            <i class="bi bi-plus text-white"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- دکمه افزودن به سبد خرید (عرض زیاد) -->
+                                    <button type="submit"
+                                            class="btn btn-info btn-detail-page cart-btn mt-4 {% if not user.is_authenticated %} disabled {% endif %}">
+                                        <i class="bi bi-cart4"></i> <span>افزودن به سبد خرید</span>
+                                    </button>
+                                </form>
+
+
+
+                            {% else %}
+                                <form class="d-flex align-items-center justify-content-center flex-column  gap-2 cart-form"
+                                      method="post" action="{% url 'cart:add_cart' product.id %}">
+                                    {% csrf_token %}
+
+                                    <!-- باکس تعداد (عرض ثابت) -->
+                                    <div class="input-group flex-nowrap w-auto mt-4">
+                                        <button class="btn btn-white btn-decrease px-3" type="button">
+                                            <i class="bi bi-dash text-white"></i>
+                                        </button>
+                                        <input type="text" name="quantity"
+                                               class="form-control text-center border border-secondary input-quantity"
+                                               value="1" min="1" max="{{ product.amount }}" required
+                                               oninvalid="setCustomeValidity('تعداد می بایست حداکثر{{ product.amount }} باشد ')"/>
+                                        <button class="btn btn-white btn-increase px-3" type="button">
+                                            <i class="bi bi-plus text-white"></i>
+                                        </button>
+                                    </div>
+
+                                    <button type="submit"
+                                            class="btn btn-info btn-detail-page cart-btn mt-4 {% if not user.is_authenticated %} disabled {% endif %}">
+                                        <i class="bi bi-cart4"></i> <span>افزودن به سبد خرید</span>
+                                    </button>
+                                </form>
+
+
+                            {% endif %}
+                        </div>
+
+
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex flex-wrap justify-content-center gap-3 ">
+                        <a href="{% url 'home:like_product' product.id %}"
+                           class="btn btn-danger btn-detail-page px-3 btn-action btn-like {% if not user.is_authenticated %} disabled {% endif %} btn-refresh-1">
+                            <i class="bi {% if is_liked %}bi-suit-heart-fill{% else %}bi-suit-heart{% endif %}"></i>
+                            <span>{% if is_liked %}حذف لایک{% else %}لایک {% endif %}</span>
+                        </a>
+
+                        <a href="{% url 'home:product_save' product.id %}"
+                           class="btn btn-success btn-detail-page px-3 {% if not user.is_authenticated %} disabled {% endif %} btn-refresh-1">
+                            <i class="bi {% if is_saved %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
+                            <span>{% if is_saved %}حذف ذخیره{% else %}ذخیره {% endif %}</span>
+                        </a>
+
+
+                    </div>
+                    <!-- Like Count Display -->
+                    <div id="likeCount" class="text-light mt-3">{{ product.like.count }} &nbsp; : &nbsp;تعداد لایک ها
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- popular products -->
+    <div id="projects" class="carousel-container container mb-5">
+        <h2 class="text-center mb-5 text-white fw-bold fs-1 mt-5">محصولات مشابه</h2>
+        <div class="row carousel-track">
+            {% for item in similar %}
+                <div class="col-md-4 col-12 card-popular h-80" onclick="openModal('{{ item.id }}')">
+                    <img src="{{ item.product_img.url }}" alt="{{ item.product_name }}" class="img-fluid">
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Modal Structure -->
+    {% for item in similar %}
+        <div id="modalSimilar-{{ item.id }}" class="modal" style="display: none;" onclick="closeModal(event)">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(event)">&times;</span>
+                <img src="{{ item.product_img.url }}" alt="{{ item.product_name }}">
+                <p class="fw-bold">{{ item.product_name }}</p>
+                <a class="text-center custom-btn-blue px-3 py-2 mt-2" href="{% url 'home:product_details' item.id %}">مشاهده
+                    محصول</a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- comment -->
+    <div class="container container-comment mt-5 d-flex flex-column align-items-center justify-content-center">
+        <div class="row align-items-center justify-content-evenly mb-5">
+            <div class="col-12 col-md-12 mt-5  ">
+                <h2 class="text-white fw-bold fs-1 me-md-5 col-12"> کامنت ها </h2>
+            </div>
+
+        </div>
+        <div class="row  mx-auto flex-column ">
+            <div class="py-3 btn-add-comment position-relative toggle-comment {% if not user.is_authenticated %} d-none {% endif %}">
+                <a class="comment-btn toggle-comment-form mx-auto">
+                    <i class="bi bi-plus-lg text-white fw-bold"></i>
+                    <span class="text-white fw-bold mx-2">یه کامنت بزار</span>
+                </a>
+
+                <form method="post" action="{% url 'home:product_comment' product.id %}"
+                      class="comment-form mt-3 d-none flex-column align-items-center justify-content-center">
+                    {% csrf_token %}
+                    <!-- Stars -->
+                    <div class="rate mb-3 text-end d-flex justify-content-end flex-row-reverse">
+                        <input type="radio" name="rate" id="star5" value="5" class="star-rate-input"/>
+                        <label for="star5" class="mx-1"><i class="bi bi-star-fill text-secondary"></i></label>
+
+                        <input type="radio" name="rate" id="star4" value="4" class="star-rate-input"/>
+                        <label for="star4" class="mx-1"><i class="bi bi-star-fill text-secondary"></i></label>
+
+                        <input type="radio" name="rate" id="star3" value="3" class="star-rate-input"/>
+                        <label for="star3" class="mx-1"><i class="bi bi-star-fill text-secondary"></i></label>
+
+                        <input type="radio" name="rate" id="star2" value="2" class="star-rate-input"/>
+                        <label for="star2" class="mx-1"><i class="bi bi-star-fill text-secondary"></i></label>
+
+                        <input type="radio" name="rate" id="star1" value="1" class="star-rate-input"/>
+                        <label for="star1" class="mx-1"><i class="bi bi-star-fill text-secondary"></i></label>
+                    </div>
+
+                    <!-- Comment -->
+                    <textarea name="comment" class="form-control add-comment-textarea text-end mb-2" rows="4"
+                              placeholder="نظر خود را بنویسید..."></textarea>
+
+                    <button type="submit" class="btn btn-success px-5 mt-3 btn-detail-page">ارسال</button>
+                </form>
+
+
+            </div>
+
+
+        </div>
+        <div class="card card-comment mx-auto mb-5">
+            <div class="card-body">
+                <div class="row flex-row-reverse g-5">
+
+                    {% for comment in product_comments %}
+                        <div class="text-end border-bottom pb-5" id="comment-{{ comment.id }}">
+                            <div class="d-flex align-items-center justify-content-between flex-md-row  flex-column-reverse">
+                                <span id="likeCommentCount-{{ comment.id }}">تعداد لایک ها 	&nbsp; : 	&nbsp;{{ comment.comment_like.count }}</span>
+                                <span class="text-secondary">{{ comment.create |jformat:"%Y/%m/%d - %H:%M" }}</span>
+                                <div class="stars float-right text-start">
+                                    {% for i in "12345" %}
+                                        {% if comment.rate|floatformat:1 >= i %}
+                                            <i class="text-warning bi bi-star-fill"></i>
+                                        {% elif comment.rate|floatformat:1 >= i|add:"-0.5" %}
+                                            <i class="text-warning bi bi-star-half"></i>
+                                        {% else %}
+                                            <i class="text-warning bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+
+                                <span class="float-left"><strong
+                                        class="fs-5"> {{ comment.user.f_name }} {{ comment.user.l_name }} </strong></span>
+
+                            </div>
+                            <div class="clearfix"></div>
+                            <p class="my-4 text-md-end text-center">{{ comment.comment }} </p>
+                            <div class="d-flex justify-content-between">
+
+                                <a id="reply-btn-{{ comment.id }}"
+                                   class="btn btn-info btn-detail-comment reply-btn {% if not user.is_authenticated %} disabled {% endif %}">
+                                    <i class="bi bi-arrow-90deg-left"></i> <span> ریپلای </span>
+                                </a>
+                                <a href="{% url 'home:like_comment' comment.id %}"
+                                   class="btn btn-danger btn-detail-comment {% if not user.is_authenticated %} disabled {% endif %} btn-refresh-1"
+                                   data-comment-id="{{ comment.id }}">
+                                    <i class="bi {% if comment.is_liked_by_user %}bi-suit-heart-fill{% else %}bi-suit-heart{% endif %}"></i>
+                                    <span>{% if comment.is_liked_by_user %}حذف لایک{% else %}لایک {% endif %}</span>
+                                </a>
+
+
+                            </div>
+
+                            <!-- Reply Form -->
+                            <form id="reply-form-{{ comment.id }}"
+                                  class="reply-form my-5 d-none d-flex justify-content-center" method="post"
+                                  action="{{ comment.get_absolute_url }}">
+                                {% csrf_token %}
+
+                                <textarea name="reply" class="form-control reply-textarea text-end mb-2  mx-auto  "
+                                          rows="3"
+                                          placeholder="جواب خود را بنویسید..."></textarea>
+                                <div class="d-flex justify-content-center ">
+                                    <button class="btn btn-success px-5 mt-2" type="submit">ارسال</button>
+                                </div>
+
+                            </form>
+
+                            <!-- Replies List -->
+                            <div id="show-replies-{{ comment.id }}" class="show-replies mt-3 d-none flex-column">
+                                {% for r in comment.comment_reply.all %}
+                                    <div class="reply-item d-none">
+                                        <div class="card card-comment reply-card mx-auto">
+                                            <div class="card-body">
+                                                <div class="row flex-row-reverse">
+                                                    <div class="text-end">
+                                                        <div class="d-flex align-items-center justify-content-between flex-md-row flex-column-reverse">
+                                                            <span class="text-secondary">{{ r.create|jformat:"%Y/%m/%d - %H:%M" }}</span>
+                                                            <span class="float-left"><strong
+                                                                    class="fs-5">{{ r.user.f_name }}{{ r.user.l_name }}</strong></span>
+                                                        </div>
+                                                        <div class="clearfix"></div>
+                                                        <p class="my-4 text-md-end text-center">{{ r.comment }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                <button type="button" id="load-more-{{ comment.id }}"
+                                        class="btn btn-light w-20 mx-auto mt-4 load-more-replies d-none">نمایش بیشتر
+                                </button>
+                            </div>
+                        </div>
+
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-auto mx-auto mb-5">
+                <ul class="pagination">
+                    {% if product_comments.has_previous %}
+                        <li>
+                            <a href="?page={{ product_comments.previous_page_number }}">&lt;</a>
+                        </li>
+                    {% endif %}
+
+
+                    {% for num in product_comments.paginator.page_range %}
+                        <li>
+                            <a href="?page={{ num }}"
+                               class="{% if product_comments.number == num %}active{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+
+                    {% if product_comments.has_next %}
+                        <li>
+                            <a href="?page={{ product_comments.next_page_number }}">&gt;</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- like & unlike product and comment , save/unSave -->
+    <script>
+        $(document).on('click', '.btn-refresh-1', function (event) {
+            event.preventDefault();
+            const $btn = $(this);
+            const commentId = $btn.data('comment-id');  // گرفتن id کامنت از data attribute
+
+            $.ajax({
+                url: $btn.attr('href'),
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    const icon = $btn.find('i');
+                    const text = $btn.find('span');
+
+                    // Handling the icons and text for liked/unliked/saved/unsaved/comment like& unlike status
+                    if (response.status === 'saved' || response.status === 'liked_product' || response.status === 'comment_liked') {
+                        icon.removeClass(response.unfilled_icon).addClass(response.filled_icon);
+                        text.text(response.active_text);
+                    } else if (response.status === 'unsaved' || response.status === 'unliked_product' || response.status === 'comment_unliked') {
+                        icon.removeClass(response.filled_icon).addClass(response.unfilled_icon);
+                        text.text(response.inactive_text);
+                    } else {
+                        alert('عملیات انجام نشد');
+                    }
+
+                    // ✅ فقط در صورتی که مقدار like_product_count وجود داشته باشه، به‌روزرسانی می‌کنه
+                    if (response.like_product_count !== undefined) {
+                        $('#likeCount').text(`${response.like_product_count}  :  تعداد لایک ها`);
+                    }
+
+                    // ✅ فقط برای کامنت مربوطه تعداد لایک رو به‌روزرسانی می‌کنیم
+                    if (response.comment_liked_count !== undefined) {
+                        $('#likeCommentCount-' + commentId).text(`${response.comment_liked_count}  :  تعداد لایک ها`);
+                    }
+                },
+                error: function () {
+                    alert('خطا در ارتباط با سرور');
+                }
+            });
+        });
+        <!--add cart-->
+        $(document).on('submit', '.cart-form', function (e) {
+            e.preventDefault();
+            const $form = $(this);
+            const formData = $form.serialize();
+
+            $.ajax({
+                url: $form.attr('action'),
+                type: 'POST',
+                data: formData,
+                headers: {'X-CSRFToken': $form.find('[name=csrfmiddlewaretoken]').val()},
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'added' || response.status === 'updated') {
+                        alert(response.message);
+                    } else {
+                        alert('خطا: ' + response.message);
+                    }
+                },
+                error: function () {
+                    alert('خطا در ارتباط با سرور');
+                }
+            });
+        });
+    </script>
+
+
+
+    {% block scripts %}
+        <script src="{% static 'home/js/detail.js' %}"></script>
+    {% endblock %}
+
+
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+

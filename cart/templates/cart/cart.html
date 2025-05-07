@@ -1,0 +1,112 @@
+{% extends '_base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'cart/css/cart.css' %}">
+{% endblock %}
+{% block title %}
+     سبد خرید
+{% endblock %}
+{% block body %}
+    <div class="card card-cart mt-5">
+        <div class="row flex-row-reverse">
+            <div class="col-lg-8 cart text-end ">
+                <div class="title">
+                    <div class="col my-3">
+                        <h4 class="text-dark fw-bold fs-1">سبد خرید</h4>
+                    </div>
+                </div>
+                {% for c in cart %}
+                    <div class="row border-top border-bottom">
+                        <div class="row main align-items-center">
+                            <div class="col-2">
+                                <img class="img-fluid image-cart" src="{{ c.product.product_img.url }}">
+                            </div>
+                            <div class="col mx-5 ">
+                                <p>{{ c.product.product_name }}  </p>
+                            </div>
+                            <div class="col">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <a class="cart-quantity-btn px-2" href="{% url 'cart:increase_cart' c.id %}">+</a>
+                                    <span class="mx-3">
+                                        {{ c.quantity }}
+                                    </span>
+                                    <a class="cart-quantity-btn px-2" href="{% url 'cart:decrease_cart' c.id %}">-</a>
+                                </div>
+                            </div>
+                            <div class="col mx-2">{% if c.product.status != 'None' %}
+                                <div class="d-flex">
+                                    <span>تومان&nbsp; </span>
+                                    <span>{% widthratio c.variant.total_price 1 c.quantity %}</span>
+                                </div>
+                            {% else %}
+                                <div class="d-flex">
+                                    <span>تومان&nbsp; </span>
+                                    <span>{% widthratio c.product.total_price 1 c.quantity %}</span>
+                                </div>
+
+                            {% endif %}
+
+                            </div>
+                            <div class="col">
+                                <a href="{% url 'cart:remove_cart' c.id%}">
+                                    <span class="close text-danger fw-bold fs-5">&#10005;</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                {% empty %}
+                    <p>!سبد خرید شما خالی است</p>
+
+                {% endfor %}
+
+                <!-- <a href="#" class="back-to-home mt-5">
+                    <i class="bi bi-house-door-fill"></i>
+                </a> -->
+            </div>
+            <div class="col-lg-4 summary text-end">
+                <form method="post" action="{% url 'order:create_order' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="tel" id="phoneInput1" value="{{ user.phone_number }}" name="order_phoneNumber"
+                               class="styled-input" required>
+                        <label for="phoneInput1" class="styled-label">شماره موبایل</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="firstNameInput" value="{{ user.f_name }}" name="order_firstName"
+                               class="styled-input" required>
+                        <label for="firstNameInput" class="styled-label">نام</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="lastNameInput" value="{{ user.l_name }}" name="order_lastName"
+                               class="styled-input" required>
+                        <label for="lastNameInput" class="styled-label">نام خانوادگی</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="form-group">
+                        <textarea id="addressInput" name="order_address" class="styled-input"
+                                  required>{{ user.address }}</textarea>
+                        <label for="addressInput" class="styled-label">آدرس</label>
+                        <span class="bar"></span>
+                    </div>
+                    <div class="row flex-row-reverse align-items-center justify-content-between">
+                        <div class="col col-12">:مبلغ کل</div>
+                        <div class="col text-end">
+                            <div class="d-flex">
+                                <span>تومان &nbsp;</span>
+                                <span>{{ total }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <button type="submit" class="custom-btn-gold text-center  py-2">ثبت سفارش</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

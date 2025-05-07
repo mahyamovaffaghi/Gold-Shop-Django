@@ -1,0 +1,116 @@
+{% extends '_base.html' %}
+{% load static %}
+{% load jformat %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'accounts/css/history.css' %}">
+{% endblock %}
+{% block title %}
+    تاریخچه خرید
+{% endblock %}
+{% block body %}
+    <div class="container mt-5 px-5">
+        <div class="row align-items-center justify-content-evenly mb-5">
+            <div class="col-12 col-md-4 text-end order-0  order-md-3">
+                <h2 class="text-white fw-bold fs-1 me-md-5 col-12"> تاریخچه خرید &nbsp;</h2>
+            </div>
+            <div class="col-12 col-md-4 order-md-1 my-3 my-md-0 text-end">
+                <div class="search-box ">
+                    <form method="post" action="{% url 'accounts:order_search' %}">
+                        {% csrf_token %}
+                        <input type="text" placeholder="جستجو محصول..." required name="search_order">
+                        <button type="submit">جستجو</button>
+                    </form>
+                    <div class="icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-3 order-md-2 mx-md-4 text-md-center text-end ">
+                <form method="get" class="d-inline">
+                    <select name="order_paid" class="sort-select" onchange="this.form.submit()">
+                        <option class="text-dark" value="">همه سفارشات</option>
+                        <option class="text-dark" value="true" {% if request.GET.order_paid == 'true' %}selected{% endif %}>پرداخت شده
+                        </option>
+                        <option class="text-dark" value="false" {% if request.GET.order_paid == 'false' %}selected{% endif %}>پرداخت
+                            نشده
+                        </option>
+                    </select>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container px-5">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped text-end" dir="rtl">
+                <thead class="my-thead">
+                <tr>
+                    <th>نام محصول</th>
+                    <th>تاریخ</th>
+                    <th>وضعیت</th>
+                    <th>تعداد</th>
+                    <th>مشخصات</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for d in data %}
+                    <tr>
+                        <td>{{ d.product.product_name }}</td>
+                        <td>{{ d.order.order_create |jformat:"%Y/%m/%d - %H:%M" }}</td>
+                        {% if d.order.order_paid == True %}
+                            <td class="text-success">پرداخت شده</td>
+                        {% else %}
+                            <td class="text-danger">پرداخت نشده</td>
+                        {% endif %}
+
+                        <td>{{ d.quantity }}</td>
+                        {% if d.product.status != 'None' %}
+                            <td>{{ d.variant.name }}</td>
+
+                        {% else %}
+                            <td>-</td>
+                        {% endif %}
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="row justify-content-center">
+        <div class="col-auto mx-auto mb-5">
+            <ul class="pagination">
+                {% if data.has_previous %}
+                    <li>
+                        <a href="?page={{ data.previous_page_number }}">&lt;</a>
+                    </li>
+                {% endif %}
+
+
+                {% for num in data.paginator.page_range %}
+                    <li>
+                        <a href="?page={{ num }}"
+                           class="{% if data.number == num %}active{% endif %}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+
+                {% if data.has_next %}
+                    <li>
+                        <a href="?page={{ data.next_page_number }}">&gt;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}
